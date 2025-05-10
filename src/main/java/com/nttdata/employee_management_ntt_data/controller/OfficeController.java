@@ -5,8 +5,11 @@ import com.nttdata.employee_management_ntt_data.service.OfficeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/offices")
@@ -16,9 +19,18 @@ public class OfficeController {
     private OfficeService officeService;
 
     @GetMapping
-    public List<Office> getAllOffices() {
-        return officeService.getAllOffices();
-    }
+public List<Map<String, Object>> getAllOffices() {
+    List<Office> offices = officeService.getAllOffices();
+    return offices.stream().map(office -> {
+        Map<String, Object> officeMap = new HashMap<>();
+        officeMap.put("id", office.getId());
+        officeMap.put("name", office.getName());
+        officeMap.put("address", office.getAddress());
+        officeMap.put("numberOfEmployees", office.getEmployees().size());
+        return officeMap;
+    }).collect(Collectors.toList());
+}
+
 
     @GetMapping("/{id}")
     public Optional<Office> getOfficeById(@PathVariable Long id) {

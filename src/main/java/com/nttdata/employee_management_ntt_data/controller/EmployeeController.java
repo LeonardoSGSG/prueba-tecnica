@@ -34,16 +34,45 @@ public List<EmployeeDTO> getAllEmployees() {
 }
 
 
-    @GetMapping("/{id}")
-    public Optional<Employee> getEmployeeById(@PathVariable Long id) {
-        return employeeService.getEmployeeById(id);
+  @GetMapping("/{id}")
+public EmployeeDTO getEmployeeById(@PathVariable Long id) {
+    Optional<Employee> existingEmployee = employeeService.getEmployeeById(id);
+
+    if (existingEmployee.isPresent()) {
+        Employee employee = existingEmployee.get();
+        return new EmployeeDTO(employee);
     }
+
+    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
+}
+   
 
 
 @PostMapping
 public Employee saveEmployee(@RequestBody Employee employee) {
     return employeeService.saveEmployee(employee);
 }
+
+@PutMapping("/{id}")
+public EmployeeDTO updateEmployee(@PathVariable Long id, @RequestBody Employee updatedEmployeeData) {
+    Optional<Employee> existingEmployee = employeeService.getEmployeeById(id);
+
+    if (existingEmployee.isPresent()) {
+        Employee employee = existingEmployee.get();
+
+        employee.setName(updatedEmployeeData.getName());
+        employee.setPhoneNumber(updatedEmployeeData.getPhoneNumber());
+        employee.setDni(updatedEmployeeData.getDni());
+        employee.setAddress(updatedEmployeeData.getAddress());
+        employee.setBirthDate(updatedEmployeeData.getBirthDate());
+
+        Employee updatedEmployee = employeeService.saveEmployee(employee);
+        return new EmployeeDTO(updatedEmployee);
+    }
+
+    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
+}
+
 
 @PutMapping("/{id}/offices")
 public EmployeeDTO updateEmployeeOffices(@PathVariable Long id, @RequestBody List<Long> officeIds) {
